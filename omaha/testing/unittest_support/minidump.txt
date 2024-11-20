@@ -1,4 +1,0 @@
-; This is a custom info file to report out of process crashes.
-[ClientCustomData]
-prod=Chrome
-ver=9.8.7.6
