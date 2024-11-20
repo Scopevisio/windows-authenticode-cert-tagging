@@ -13,14 +13,14 @@
 // limitations under the License.
 // ========================================================================
 
-package main
+package pkg
 
 import (
 	"bytes"
 	"encoding/binary"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -83,7 +83,7 @@ func TestPrintAppendedTag(t *testing.T) {
 // because we know that only our process can write in the test's temp
 // directory.
 func tempFileName(t *testing.T) string {
-	f, err := ioutil.TempFile(t.TempDir(), "certificate_tag_test")
+	f, err := os.CreateTemp(t.TempDir(), "certificate_tag_test")
 	if err != nil {
 		panic(err)
 	}
@@ -101,7 +101,7 @@ func SetSuperfluousCertTagHelper(t *testing.T, source string) {
 		t.Fatalf("Test input %s, error executing %q: %v; output:\n%s", source, tagBinary, err, output)
 	}
 
-	contents, err := ioutil.ReadFile(out)
+	contents, err := os.ReadFile(out)
 	if err != nil {
 		t.Fatalf("Test input %s, failed to read output file: %s", source, err)
 	}
@@ -117,7 +117,7 @@ func SetSuperfluousCertTagHelper(t *testing.T, source string) {
 		t.Fatalf("Test input %s, error executing %q: %v; output:\n%s", source, tagBinary, err, output)
 	}
 
-	contents, err = ioutil.ReadFile(out)
+	contents, err = os.ReadFile(out)
 	if err != nil {
 		t.Fatalf("Test input %s, failed to read output file: %s", source, err)
 	}
@@ -580,7 +580,7 @@ func TestMsiSuperfluousCert(t *testing.T) {
 		{sourceMSI3},
 	}
 	for _, e := range expect {
-		contents, err := ioutil.ReadFile(e.infile)
+		contents, err := os.ReadFile(e.infile)
 		if err != nil {
 			t.Fatalf("Error reading test input %s: %v", e.infile, err)
 		}
@@ -645,7 +645,7 @@ func TestFindTag(t *testing.T) {
 	}
 
 	for _, e := range expect {
-		offset, length, err := findTag([]byte(e.in), e.start)
+		offset, length, err := FindTag([]byte(e.in), e.start)
 		if offset != e.offset {
 			t.Errorf("test %s, got offset %d, want %d", e.name, offset, e.offset)
 		}
@@ -673,7 +673,7 @@ func TestFindTag(t *testing.T) {
 		{sourceMSI4, 2048},
 	}
 	for i, e := range expect2 {
-		contents, err := ioutil.ReadFile(e.infile)
+		contents, err := os.ReadFile(e.infile)
 		if err != nil {
 			t.Fatalf("Case %d, error reading test input %s: %v", i, e.infile, err)
 		}
@@ -682,13 +682,13 @@ func TestFindTag(t *testing.T) {
 			t.Fatalf("Case %d, error creating MSIBinary from test input %s: %v", i, e.infile, err)
 		}
 		// NewBinary may modify |contents|.
-		contents, err = ioutil.ReadFile(e.infile)
+		contents, err = os.ReadFile(e.infile)
 		if err != nil {
 			t.Fatalf("Case %d, error reading test input %s: %v", i, e.infile, err)
 		}
 
 		// No tag before tagging.
-		offset, _, err := findTag(contents, bin.certificateOffset())
+		offset, _, err := FindTag(contents, bin.CertificateOffset())
 		if err != nil {
 			t.Errorf("Case %d, error in findTag for untagged source %s: %v", i, e.infile, err)
 		}
@@ -703,7 +703,7 @@ func TestFindTag(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Case %d, error tagging source %s: %v", i, e.infile, err)
 		}
-		offset, length, err := findTag(contents, bin.certificateOffset())
+		offset, length, err := FindTag(contents, bin.CertificateOffset())
 		if err != nil {
 			t.Errorf("Case %d, error in findTag for source %s: %v", i, e.infile, err)
 		}
