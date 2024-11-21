@@ -13,12 +13,12 @@
 // limitations under the License.
 // ========================================================================
 
+.idea/
+*.iml
 *.idb
 *.pdb
 *.pyc
 .vs/
 .vscode/
-omaha/common/omaha_customization_proxy_clsid.h
-omaha/proxy_clsids.txt
-omaha/scons-out/
-third_party/lzma/files/**/obj/
+
+certificate_tag.exe
